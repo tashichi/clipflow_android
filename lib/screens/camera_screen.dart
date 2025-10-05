@@ -85,32 +85,31 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _startRecording() async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
-    if (_isRecording) return;
+  if (_controller == null || !_controller!.value.isInitialized) return;
+  if (_isRecording) return;
 
-    setState(() {
-      _isRecording = true;
-    });
+  setState(() {
+    _isRecording = true;
+  });
 
-    try {
-      await _controller!.startVideoRecording();
-      
-      // 重要: 録画開始後、少し待ってから1秒タイマーを開始
-      await Future.delayed(const Duration(milliseconds: 200));  // 録画初期化待ち
-      
-      // 1秒録画
-      await Future.delayed(const Duration(milliseconds: 800));  // 残り800ms（合計1秒）
-
+  try {
+    // 録画開始（iOS版と同じ: 即座に開始）
+    await _controller!.startVideoRecording();
+    
+    // iOS版と同じパターン: 即座に1秒タイマーをセット
+    Future.delayed(const Duration(seconds: 1)).then((_) {
       if (_isRecording) {
-        await _stopRecording();
+        _stopRecording();
       }
-    } catch (e) {
-      print('Recording error: $e');
-      setState(() {
-        _isRecording = false;
-      });
-    }
+    });
+    
+  } catch (e) {
+    print('Recording error: $e');
+    setState(() {
+      _isRecording = false;
+    });
   }
+}
 
   Future<void> _stopRecording() async {
     if (_controller == null || !_isRecording) return;
